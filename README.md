@@ -1,14 +1,5 @@
 <h1>Reckon</h1>
---- Written by MaliceInChains ---
-
-
-Example Usage: 
-
-./reckon.sh 192.168.1.100 
-
-./reckon.sh scanme.nmap.org
-
-./reckon.sh /home/user/hostlist.txt
+Written by MaliceInChains
 
 Reckon is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and utilizing some simple logic in enumerating the more targetable services like HTTP and SMB.
 
