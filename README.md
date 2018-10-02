@@ -24,22 +24,8 @@ Reckon runs in five total stages:
 
   Stage 4: Targeted service scanning/enumeration - Using the results from the quick scan and version scan, Reckon will begin running more aggressive scanners against the previously identified ports/services.
 
-Services are targeted in the following order:
-
-HTTP/HTTPS - 
-Curl for Web headers of the / directory
-HTTP NSE Safe Scripts
-Default Nikto scan
-Default Dirb scan (common.txt)
+Services are targeted in the following order - HTTP/HTTPS, SMB/NetBIOS/Samba, Other
 
 NOTE - In an attempt to prevent inaccurate results, DoS condictions, and general performance issues, Reckon only allows one instance of Nikto to run at a time. For example, if a single target has http ports 80, 443, and 8080 open (or multiple targets have port 80 open), Reckon will create a scan queue so that Nikto is run on each port (or host) one at a time rather than similtaniously. This same consideration is also done for dirb scans. This can be disabled using the --noqueue arguement, but I wouldn't advise it.
-
-SMB/Samba/NetBIOS - 
-Running SMB NSE Safe Scripts
-Running enum4linux
-Running SMB-Vuln NSE Scripts - This fuction is disabled by default due to the potential of crashing the target system(s) but can be enabled by using the --dangerous argument.
-
-All other services - 
-Running related NSE safe scripts
 
 5). Expand Target Scope - After the scans for the top 100 tcp ports have completed, Reckon will begin targeting the remaining tcp ports and proceed through stages 2, 3, and 4 before completing (or moving to the next host if a host list was provided as an argument).
