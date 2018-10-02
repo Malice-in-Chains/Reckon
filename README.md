@@ -16,9 +16,9 @@ Reckon's work flow was designed to provide you with quick highlevel results prio
 
 ### Reckon runs in five stages
 
-* <b>Stage 1:</b> Testing directory creation - Reckon will first create a target directory in the current working directory when executed. The results of future scans will be cleaned, organized, and printed to terminal. Copies of the full scans results will also be stored in the target directory.
+* <b>Stage 1:</b> Create testing directory - Upon execution, a target directory will be created in the current working directory. The results of scans will be filtered, organized, and printed to terminal while copies of the scans results will be stored in the target directory.
 
-* <b>Stage 2:</b> Conduct a quick scan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. NOTE: Reckon will conduct a full tcp (all 65535 ports) scan later in stage 5. This quick scan is intended to give you nearly immediate results so you can descide where you would like to focus your attention (manual enumeration and/or research).
+* <b>Stage 2:</b> Conduct a quick scan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. This scan is intended to give you quick results so you can descide where you would like to focus your attention (manual enumeration/research) while awaiting the results of pending scans in stage 3 and 4.
 
 * <b>Stage 3:</b> Conduct a version scan - Run an nmap version scan targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 1000 would be flagged and handled the same as port 80 or 443 in stage 4.
 
