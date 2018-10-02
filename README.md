@@ -1,20 +1,18 @@
 # Reckon
 Written by MaliceInChains
 
-## Why?
-Reckon is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and utilizing some simple logic in enumerating the more targetable services like HTTP and SMB.
+## Purpose
+Reckon is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and utilizing some simple logic in enumerating the more targetable services like HTTP and SMB. Reckon was built to run on Kali linux and is currently wrapping multiple nmap scans, nse scripts, curl, Enum4linux, Nikto, and Dirb. Reckon was built with an external unauthenticated blackbox perspective. I do plan to add additional tools and functions in the future to more aggressively target other services, but for now Reckon prioritizes HTTP and SMB a bit more than other services. 
 
-### Background
-Reckon was built to run on Kali linux and is currently wrapping multiple nmap scans, nse scripts, curl, Enum4linux, Nikto, and Dirb. Reckon was built with an external unauthenticated blackbox perspective. I do plan to add additional tools and functions in the future to more aggressively target other services, but for now Reckon prioritizes HTTP and SMB a bit more than other services. 
-
+### Workflow
 Reckon's work flow was designed to provide quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
-
+```
 As shown in the example usage, Reckon can be used against a single target or multiple targets when provided a list of hosts. 
-
+```
 Reckon runs in five total stages:
-
+```
   Stage 1: Testing directory creation - Reckon will first create a target directory in the current working directory when executed. The results of future scans will be cleaned, organized, and printed to terminal. Copies of the full scans results will also be stored in the target directory.
-
+```
   Stage 2: Conduct a quick scan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. NOTE: Reckon will conduct a full tcp (all 65535 ports) scan later in stage 5. This quick scan is intended to give you nearly immediate results so you can descide where you would like to focus your attention (manual enumeration and/or research).
 
   Stage 3: Conduct a version scan - Run an nmap version scan targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 1000 would be flagged and handled the same as port 80 or 443 in later stages.
