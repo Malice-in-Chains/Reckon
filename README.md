@@ -14,7 +14,7 @@ Reckon's work flow was designed to provide quick highlevel results prior to cond
 
 As shown in the example usage, Reckon can be used against a single target or multiple targets when provided a list of hosts. 
 
-Reckon runs in five total stages:
+### Reckon runs in five total stages:
 
 <b>Stage 1:</b> Testing directory creation - Reckon will first create a target directory in the current working directory when executed. The results of future scans will be cleaned, organized, and printed to terminal. Copies of the full scans results will also be stored in the target directory.
 
