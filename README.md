@@ -11,7 +11,9 @@ Reckon was built to run on Kali Linux and is currently wrapping multiple tools s
 
 ### Example Usage
 ``` ./reckon.sh 10.10.10.10 ```
+
 ``` ./reckon.sh scanme.nmap.org```
+
 ``` ./reckon.sh /home/user/hostlist.txt```
 
 ### Workflow
