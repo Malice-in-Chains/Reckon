@@ -9,6 +9,9 @@ Reckon is simplistic wrapper script written in bash. It was written in preparati
 ### Prerequisites
 Reckon was built to run on Kali Linux and is currently wrapping multiple tools such as nmap, curl, enum4linux, nikto, and dirb.  
 
+### Example Usage
+``` ./reckon.sh 10.10.10.10
+
 ### Workflow
 Reckon's work flow was designed to provide quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
 
