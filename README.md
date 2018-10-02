@@ -18,14 +18,14 @@ As shown in the example usage, Reckon can be used against a single target or mul
 
 * <b>Stage 1:</b> Testing directory creation - Reckon will first create a target directory in the current working directory when executed. The results of future scans will be cleaned, organized, and printed to terminal. Copies of the full scans results will also be stored in the target directory.
 
-<b>Stage 2:</b> Conduct a quick scan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. NOTE: Reckon will conduct a full tcp (all 65535 ports) scan later in stage 5. This quick scan is intended to give you nearly immediate results so you can descide where you would like to focus your attention (manual enumeration and/or research).
+* <b>Stage 2:</b> Conduct a quick scan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. NOTE: Reckon will conduct a full tcp (all 65535 ports) scan later in stage 5. This quick scan is intended to give you nearly immediate results so you can descide where you would like to focus your attention (manual enumeration and/or research).
 
-<b>Stage 3:</b> Conduct a version scan - Run an nmap version scan targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 1000 would be flagged and handled the same as port 80 or 443 in later stages.
+* <b>Stage 3:</b> Conduct a version scan - Run an nmap version scan targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 1000 would be flagged and handled the same as port 80 or 443 in later stages.
 
-<b>Stage 4:</b> Targeted service scanning/enumeration - Using the results from the quick scan and version scan, Reckon will begin running more aggressive scanners against the previously identified ports/services.
+* <b>Stage 4:</b> Targeted service scanning/enumeration - Using the results from the quick scan and version scan, Reckon will begin running more aggressive scanners against the previously identified ports/services.
 
 Services are targeted in the following order - HTTP/HTTPS, SMB/NetBIOS/Samba, Other
 
 NOTE - In an attempt to prevent inaccurate results, DoS condictions, and general performance issues, Reckon only allows one instance of Nikto to run at a time. For example, if a single target has http ports 80, 443, and 8080 open (or multiple targets have port 80 open), Reckon will create a scan queue so that Nikto is run on each port (or host) one at a time rather than similtaniously. This same consideration is also done for dirb scans. This can be disabled using the --noqueue arguement, but I wouldn't advise it.
 
-<b>Stage 5:</b> Expand Target Scope - After the scans for the top 100 tcp ports have completed, Reckon will begin targeting the remaining tcp ports and proceed through stages 2, 3, and 4 before completing (or moving to the next host if a host list was provided as an argument).
+* <b>Stage 5:</b> Expand Target Scope - After the scans for the top 100 tcp ports have completed, Reckon will begin targeting the remaining tcp ports and proceed through stages 2, 3, and 4 before completing (or moving to the next host if a host list was provided as an argument).
