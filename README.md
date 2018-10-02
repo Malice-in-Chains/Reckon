@@ -11,6 +11,8 @@ Reckon was built to run on Kali Linux and is currently wrapping multiple tools s
 
 ### Example Usage
 ``` ./reckon.sh 10.10.10.10 ```
+``` ./reckon.sh scanme.nmap.org```
+``` ./reckon.sh /home/user/hostlist.txt```
 
 ### Workflow
 Reckon's work flow was designed to provide quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
