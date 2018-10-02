@@ -1,10 +1,5 @@
 # Reckon
-Written by MaliceInChains
-
-maliceinchains106@gmail.com
-
-## Purpose
-Reckon is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB. 
+Written by MaliceInChains - is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB.
 
 ### Prerequisites
 Reckon was built to run on Kali Linux and is currently wrapping multiple tools such as nmap, curl, enum4linux, nikto, and dirb.  
