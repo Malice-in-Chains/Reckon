@@ -1,11 +1,12 @@
 <h1>Reckon</h1>
 --- Written by MaliceInChains ---
 
+<code>
 [!] Example Usage: 
 [-] ./reckon.sh 192.168.1.100 
 [-] ./reckon.sh scanme.nmap.org
 [-] ./reckon.sh /home/user/hostlist.txt 
-
+</code>
 
 
 
