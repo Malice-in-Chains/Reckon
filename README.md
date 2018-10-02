@@ -1,8 +1,8 @@
 # Reckon
-Written by MaliceInChains - is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB.
+Is a simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more time efficient during testing by automating some basic common tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB.
 
 ### Prerequisites
-Reckon was built to run on Kali Linux and is currently wrapping multiple tools such as nmap, curl, enum4linux, nikto, and dirb.  
+Reckon will run on any fresh Kali Linux install and is currently wrapping multiple tools and scripts such as: Nmap, Nmap-NSE, Curl, Enum4linux, Nikto, and Dirb. Reckon shouldn't have issue running on other Linux distros provided these tools are present.
 
 ### Example Usage
 ``` ./reckon.sh 10.10.10.10 ```
@@ -12,9 +12,7 @@ Reckon was built to run on Kali Linux and is currently wrapping multiple tools s
 ``` ./reckon.sh /home/user/hostlist.txt```
 
 ### Workflow
-Reckon's work flow was designed to provide quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
-
-As shown in the example usage, Reckon can be used against a single target or multiple targets when provided a list of hosts. 
+Reckon's work flow was designed to provide you with quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
 
 ### Reckon runs in five stages
 
