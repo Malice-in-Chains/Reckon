@@ -1,15 +1,16 @@
-<h1>Reckon</h1>
+# Reckon
 Written by MaliceInChains
 
-<br>
+## Why?
 Reckon is simplistic wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more efficient during testing by automating some basic common tasks and utilizing some simple logic in enumerating the more targetable services like HTTP and SMB.
-<br>
+
+### Background
 Reckon was built to run on Kali linux and is currently wrapping multiple nmap scans, nse scripts, curl, Enum4linux, Nikto, and Dirb. Reckon was built with an external unauthenticated blackbox perspective. I do plan to add additional tools and functions in the future to more aggressively target other services, but for now Reckon prioritizes HTTP and SMB a bit more than other services. 
-<br>
+
 Reckon's work flow was designed to provide quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
-<br>
+
 As shown in the example usage, Reckon can be used against a single target or multiple targets when provided a list of hosts. 
-<br>
+
 Reckon runs in five total stages:
 
   Stage 1: Testing directory creation - Reckon will first create a target directory in the current working directory when executed. The results of future scans will be cleaned, organized, and printed to terminal. Copies of the full scans results will also be stored in the target directory.
