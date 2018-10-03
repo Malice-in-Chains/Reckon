@@ -27,7 +27,7 @@ Reckon's work flow was designed to provide you with quick highlevel results prio
 * <b>Stage 5:</b> FullScan - After the scans for the top 100 tcp ports have completed, Reckon will begin targeting the remaining tcp ports and proceed through stages 2, 3, and 4 before completing (or moving to the next host if a host list was provided as an argument).
 
 ### Limitations
-* Reckon is a basic script running mostly default scans for the scripts/tools it is managing. Reckon should not be used with the expection of replacing thorough enumeration, however it is useful
+* Reckon is a basic script running mostly default scans for the scripts/tools it is managing. Reckon should not be used with the expection of replacing thorough enumeration.
 * At this time, Reckon does not target UDP ports and/or services. 
 
 
