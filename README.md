@@ -25,3 +25,9 @@ Reckon's work flow was designed to provide you with quick highlevel results prio
 * <b>Stage 4:</b> EnumerationScan - Using the results from the quick scan and version scan, Reckon will begin running more aggressive scanners against the previously identified ports/services. Services are targeted in the following order: HTTP/HTTPS, SMB/NetBIOS/Samba, Other. Please note, in an attempt to prevent inaccurate results, DoS condictions, and general performance issues, Reckon only allows one instance of Nikto to run at a time however will create a scan queue so that Nikto is run against each port (or host) one at a time rather than similtaniously. This same consideration also applies to  dirb scans. 
 
 * <b>Stage 5:</b> FullScan - After the scans for the top 100 tcp ports have completed, Reckon will begin targeting the remaining tcp ports and proceed through stages 2, 3, and 4 before completing (or moving to the next host if a host list was provided as an argument).
+
+### Limitations
+* Reckon is a basic script running mostly default scans for the scripts/tools it is managing. Reckon should not be used with the expection of replacing thorough enumeration.
+* At this time, Reckon does not target UDP ports and/or services. 
+
+
