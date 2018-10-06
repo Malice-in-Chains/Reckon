@@ -29,4 +29,4 @@ Reckon's work flow was designed to provide you with quick highlevel results prio
 ### Limitations
 * Reckon is a basic script running mostly default scans for the scripts/tools it is managing. Reckon should not be used with the expection of replacing thorough enumeration.
 * At this time, Reckon does not target UDP ports and/or services. 
-* All limitations restricted tools of the OSCP exam: https://support.offensive-security.com/#!oscp-exam-guide.md
+* Adhears to all OSCP exam limitations: https://support.offensive-security.com/#!oscp-exam-guide.md
