@@ -27,6 +27,6 @@ Reckon's work flow was designed to provide incremental results so you an progres
 * <b>Stage 5:</b> FullScan - At this point only the top 100 tcp and udp ports have been identified and scanned. In this stage, Reckon will begin scanning the remaining 65435 (65535 - 100) tcp and udp ports. Previously identified ports will not be rescanned however any newly identified open ports will be sent through Stages 3 and 4. This phase is really for peace of mind for the event that a target server is running obscure services on epimeral ports. 
 
 ### Limitations
-* Reckon is only a simple bash script running mostly default scans for the scripts/tools it is wrapping. It should not be considered "Aggressive Enumeration" by any means and should not replace manual enumeration. 
+* Reckon is only a simple bash script running mostly default scans for the scripts/tools it is wrapping. It should not be considered "Aggressive Enumeration" by any means and should not replace manual enumeration. This script is intended to automate and provide results to simplistic/common tasks during the enumeration phase.
 
 * Reckon adhears to all OSCP exam restrictions: https://support.offensive-security.com/#!oscp-exam-guide.md
