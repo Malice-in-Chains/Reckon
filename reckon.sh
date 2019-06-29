@@ -299,7 +299,7 @@ alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports
 	delta=$(cat .fsopen |wc -l)
 
 	if [[ "$delta" -gt "0" ]]; then
-		echo -e "${GREEN}[!]${NC}   FullScan identified $(cat .fsopen |wc -l) additional ports on $target." "\a"  |tee -a reckon
+		echo -e "${GREEN}[!]${NC}   FullScan identified $(cat .fsopen |wc -l) additional tcp port(s) on $target." "\a"  |tee -a reckon
 		for nports in $(cat .fsopen |awk '{print$1}'); do 
 			echo "[-]      $nports" |tee -a reckon
 		done
@@ -328,7 +328,7 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 	delta=$(cat .fsopen |wc -l)
 
 	if [[ "$delta" -gt "0" ]]; then
-		echo -e "${GREEN}[!]${NC}   FullScan identified $(cat .fsopen |wc -l) additional udp ports on $target." "\a"  |tee -a reckon
+		echo -e "${GREEN}[!]${NC}   FullScan identified $(cat .fsopen |wc -l) additional udp port(s) on $target." "\a"  |tee -a reckon
 		for nports in $(cat .fsopen |awk '{print$1}'); do 
 			echo "[-]      $nports" |tee -a reckon
 		done
@@ -347,7 +347,7 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 
 waitforscans(){ # Holds the terminal open until all Nikto scans have completed.
     scansrunning=$(ps -aux |grep $target |grep -v grep |grep -v reckon |wc -l)
-	echo -e "${GREEN}[!]${NC} Waiting on $scansrunning scans.."
+	echo -e "${GREEN}[!]${NC} Waiting on $scansrunning scan(s) to complete"
 	if [[ "$scansrunning" -gt "0" ]]; then
 		while [[ "$scansrunning" -gt "0" ]]; do 
 			sleep 1
@@ -385,12 +385,16 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	enumscans
 	fi
 
-	echo -e "${GREEN}[S5]${NC} Running Full Scan against all tcp and udp ports." |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Full Scan against all tcp ports." |tee -a reckon
 	alltcpscan
+	
+	echo -e "${GREEN}[!]${NC} Running Full Scan against all tcp ports." |tee -a reckon
 	alludpscan
 
+	scansrunning=$(ps -aux |grep $target |grep -v grep |grep -v reckon |wc -l)
+	if [[ "$scansrunning" -gt "0" ]]; then	
 	waitforscans
-	echo -e "${GREEN}[!]${NC} Reckon Script has completed" "\a" "\a" |tee -a reckon
+	fi
 	echo -e "${GREEN}[!]${NC} Reckon Script has completed" "\a" "\a" |tee -a reckon
 	cd $workdir
 }
