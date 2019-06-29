@@ -13,7 +13,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# For calculating runtime
+# For calculating run time
 SECONDS=0
 
 topscan(){ # Conducts a quick scan of top ___ TCP ports, change tports for top 10
@@ -175,7 +175,7 @@ nsedefother(){ # Runs Default NSE scripts
 	openudpports=$(cat .openudpports |grep open |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep -v filtered |wc -l)
 	opentcpports=$(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |grep open |wc -l)
 	
-	# NSE Safe scripts for open TCP ports
+	# NSE Default scripts for open TCP ports
 	if [[ "$opentcpports" -gt "0" ]]; then
 		for otherports in $(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |grep open |awk -F "/" '{print$1}'); do
 			echo -e "${GREEN}[!]${NC} Running NSE Default Scripts against TCP port $otherports" |tee -a reckon
@@ -227,13 +227,13 @@ enumflnx(){ # Runs enum4linux
 	unset IFS
 }
 
-smbnsedefault(){ # Runs safe NSE SMB scripts
+smbnsedefault(){ # Runs Def NSE SMB scripts
 	echo -e "${GREEN}[!]${NC} Running NSE Default Scripts for SMB ports" |tee -a reckon
 	for smbports in $(cat .open* |grep open |egrep -i '(microsoft-ds|netbios-ssn|samba|smb)'|awk -F "/" '{print$1}' |sort -g);do
-		nmap -Pn -sV -sC -sT -sU $target -p $smbports --open -oN $smbports-smb-nsesafe 2> /dev/null 1> /dev/null
+		nmap -Pn -sV -sC -sT -sU $target -p $smbports --open -oN $smbports-smb-nsedef 2> /dev/null 1> /dev/null
 		IFS=$'\n'
-			for smbenumsafe in $(cat $smbports-smb-nsesafe |grep "|" |cut -c 3-); do
-				echo "[-]      $smbenumsafe" |tee -a reckon
+			for smbenumdef in $(cat $smbports-smb-nsedef |grep "|" |cut -c 3-); do
+				echo "[-]      $smbenumdef" |tee -a reckon
 			done
 			unset IFS
 	done
@@ -383,8 +383,15 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	if [[ "$scansrunning" -gt "0" ]]; then	
 	waitforscans
 	fi
-	echo -e "${GREEN}[!]${NC} Reckon Script completed in $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
-	cd $workdir
+
+	rm .openports
+	rm .openudpports
+	echo -e "${GREEN}[!]${NC} --- Reckon Scan Complete --- " |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Runtime: $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
+	echo -e "${GREEN}[!}${NC} The following files have been created: "
+	echo -e "${GREEN}[!}${NC} -----------------------------" 
+	ls |sort -n
+	echo -e "${GREEN}[!}${NC} -----------------------------" 
 }
 
 splash(){ # Banner just because
