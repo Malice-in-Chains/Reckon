@@ -5,8 +5,7 @@ NC='\033[0m'
 tports=100
 round=1
 
-topscan(){ 
-	# Conducts a quick scan of top 100 tcp ports.
+topscan(){ # Conducts a quick scan of top ___ tcp ports, change tports for top 10.
 	nmap -Pn -sT $target -oN quickscan --top-ports $tports --open >/dev/null 2>&1;
 	cat quickscan |grep open |grep -v nmap > .openports
 	echo -e "${GREEN}[!]${NC}   Nmap identified $(cat quickscan |grep open |grep -v nmap |wc -l) open tcp ports on $target." "\a"  |tee -a reckon
@@ -87,7 +86,7 @@ httpenum(){ # Runs various scanners against http and https ports
 	
 	for wports in $(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |awk '{print$1}' |awk -F "/" '{print$1}' |sort -g); do
 		pullheaders
-		nsesafehttp
+		nsedefhttp
 	done
 	niktohttp&
 	dirbhttp&
@@ -113,7 +112,7 @@ pullheaders(){ # Grabs HTTP headers from http://target/
 	unset IFS
 }
 
-niktohttp(){
+niktohttp(){ # Runs default Nikto scan
 	wports=$(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
 	if [[ "$wports" -gt "0" ]];then
 		echo -e "${GREEN}[!]${NC}    Nikto queued for http ports." |tee -a reckon
@@ -136,17 +135,17 @@ niktohttp(){
 	fi
 }
 
-dirbhttp(){
+dirbhttp(){  #Runs dirb against / of web services
 	wports=$(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
 	if [[ "$wports" -gt "0" ]];then
 		echo -e "${GREEN}[!]${NC}    Dirb queued for http ports." |tee -a reckon
 		for dirbports in $(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |awk '{print$1}' |awk -F "/" '{print$1}' |sort -g); do
 		
 			if [[ "$wports" == "443" ]]; then
-				dirb https://$target/ -r  2> /dev/null 1> $dirbports-dirb
+				dirb https://$target/ /usr/share/wordlists/dirb/big.txt -S -r -w  2> /dev/null 1> $dirbports-dirb
 				echo -e "${GREEN}[!]${NC} The Dirb scan for https://$target/ has completed." "\a" |tee -a reckon
 			else
-				dirb http://$target:$dirbports -r 2> /dev/null 1> $dirbports-dirb
+				dirb http://$target:$dirbports/ /usr/share/wordlists/dirb/big.txt -S -r -w 2> /dev/null 1> $dirbports-dirb
 				echo -e "${GREEN}[!]${NC} The Dirb scan for http://$target:$dirbports/ has completed." "\a" |tee -a reckon
 			fi
 
@@ -168,8 +167,8 @@ dirbhttp(){
 	fi
 }
 
-nsesafehttp(){ # Runs safe NSE scripts
-	echo -e "${GREEN}[!]${NC}    Running NSE scripts against tcp port $wports." |tee -a reckon
+nsedefhttp(){ # Runs Default HTTP NSE scripts
+	echo -e "${GREEN}[!]${NC}    Running NSE Default Scripts against HTTP on port $wports." |tee -a reckon
 	nmap -Pn -sT -sV -sC $target -p $wports -oN $wports-nse 2> /dev/null 1> /dev/null
 	results=$(cat $wports-nse |grep "|" |wc -l)
 
@@ -180,19 +179,19 @@ nsesafehttp(){ # Runs safe NSE scripts
 		done
 		unset IFS
 	else
-		echo "[-]      No results from NSE scripts." |tee -a reckon
+		echo "[-]      No results from NSE Default scripts." |tee -a reckon
 	fi
 }
 
-nsesafeother(){ # Runs safe NSE scripts
+nsedefother(){ # Runs Default NSE scripts
 	
 	openudpports=$(cat .openudpports |grep open |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep -v filtered |wc -l)
-	opentcpports=$(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep open |wc -l)
+	opentcpports=$(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |grep open |wc -l)
 	
 	# NSE Safe scripts for open tcp ports
 	if [[ "$opentcpports" -gt "0" ]]; then
-		for otherports in $(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep open |awk -F "/" '{print$1}'); do
-			echo -e "${GREEN}[!]${NC}    Running Nmap NSE safe scripts against tcp port $otherports." |tee -a reckon
+		for otherports in $(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |grep open |awk -F "/" '{print$1}'); do
+			echo -e "${GREEN}[!]${NC}    Running NSE Default Scripts against tcp port $otherports." |tee -a reckon
 			nmap -Pn -sT -sV -sC $target -p $otherports --open -oN $otherports-tcp-nse 2> /dev/null 1> /dev/null
 			results=$(cat $otherports-tcp-nse |grep "|" |wc -l)
 
@@ -209,7 +208,7 @@ nsesafeother(){ # Runs safe NSE scripts
 	# NSE Safe scripts for open udp ports
 	if [[ "$openudpports" -gt "0" ]]; then
 		for otherports in $(cat .openudpports |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep open |awk -F "/" '{print$1}'); do
-			echo -e "${GREEN}[!]${NC}    Running Nmap NSE safe scripts against udp port $otherports." |tee -a reckon
+			echo -e "${GREEN}[!]${NC}    Running NSE Default Scripts against udp port $otherports." |tee -a reckon
 			nmap -Pn -sU -sV -sC $target -p $otherports --open -oN $otherports-udp-nse 2> /dev/null 1> /dev/null
 			results=$(cat $otherports-udp-nse |grep "|" |wc -l)
 
@@ -225,61 +224,63 @@ nsesafeother(){ # Runs safe NSE scripts
 
 }
 
-enum4linux(){ # Runs enum4linux
+enumflnx(){ # Runs enum4linux
 	enumdir=$(pwd)
 	echo -e "${GREEN}[!]${NC} Running Enum4Linux on $target." |tee -a reckon
 	enum4linux $target 1> smb-enum4linux 2> /dev/null
-	echo -e "${GREEN}[!]${NC} Enum4Linux Report is ready for review: $enumdir/smb-enum4linux" "\a"	 |tee -a reckon
+	smblines=$(cat $enumdir/smb-enum4linux |wc -l)
+	echo -e "${GREEN}[!]${NC} Enum4Linux Report $smblines is ready for review: $enumdir/smb-enum4linux" "\a"	 |tee -a reckon
 }
 
-smbsafense(){ # Runs safe NSE SMB scripts
-	echo -e "${GREEN}[!]${NC} Running NSE Safe Scripts for SMB/Samba/NetBIOS ports." |tee -a reckon
-	for smbports in $(cat .open* |grep open |egrep -i '(microsoft-ds|netbios-ssn|samba)'|awk -F "/" '{print$1}' |sort -g);do
-	nmap -Pn -sV -sC -sT -sU $target -p $smbports --open -oN $smbports-smb-nsesafe 2> /dev/null 1> /dev/null
+smbnsedefault(){ # Runs safe NSE SMB scripts
+	echo -e "${GREEN}[!]${NC} Running NSE Default scripts for SMB/Samba/NetBIOS ports." |tee -a reckon
+	for smbports in $(cat .open* |grep open |egrep -i '(microsoft-ds|netbios-ssn|samba|smb)'|awk -F "/" '{print$1}' |sort -g);do
+		nmap -Pn -sV -sC -sT -sU $target -p $smbports --open -oN $smbports-smb-nsesafe 2> /dev/null 1> /dev/null
 		IFS=$'\n'
-		for smbenumsafe in $(cat $smbports-smb-nsesafe |grep "|" |cut -c 3-); do
-			echo "[-]      $smbenumsafe"
-		done
-		unset IFS
+			for smbenumsafe in $(cat $smbports-smb-nsesafe |grep "|" |cut -c 3-); do
+				echo "[-]      $smbenumsafe"
+			done
+			unset IFS
 	done
 }
 
 smbnsevulns(){ # Runs all smb-vuln NSE scripts. DANGER: This could crash the target.
 	echo -e "${GREEN}[!]${NC} Running NSE Vuln Scripts for SMB" |tee -a reckon
-	nmap -p 137,138,139,445 $target --script smb-vuln* -oN smb-nsevulns 2> /dev/null 1> /dev/null
+	nmap -sT -sU -sV -p 137,138,139,445 $target --script smb-vuln* -oN smb-nsevulns 2> /dev/null 1> /dev/null
 	
 	smbresults=$(cat smb-nsevulns |grep "|" |wc -l)
 	
 	if [[ "$smbresults" -gt "0" ]]; then
 		IFS=$'\n';
-		for smbscan in $(cat nse-smbscan |grep "|" |cut -c 3-); do
+		for smbscan in $(cat nse-smbvulns |grep "|" |cut -c 3-); do
 			echo "[-]      $smbscan" |tee -a reckon
 		done
 		unset IFS
 	else 
-	echo -e "${GREEN}[!]${NC} NSE Scripts for SMB Failed. No Results." |tee -a reckon
+	echo -e "${GREEN}[!]${NC} NSE Vuln Scripts for SMB Failed. No Results." |tee -a reckon
 	fi
 }
 
-enumscans(){
+enumscans(){ # Creates a priority of services to enumerate first.
 	wports=$(cat .openports |grep http |wc -l)
 		if [[ "$wports" -gt "0" ]]; then
 			httpenum
 		fi
 
-	smbports=$(cat .open* |egrep -i '(microsoft-ds|netbios-ssn|samba)'|wc -l)
+	smbports=$(cat .open* |egrep -i '(microsoft-ds|netbios-ssn|samba|smb)'|wc -l)
 		if [[ "$smbports" -gt "0" ]]; then
-			enum4linux
+			enumflnx
+			smbnsedefault
 			smbnsevulns
 		fi
 
 	otherports=$(cat .open* |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |wc -l)
 		if [[ "$otherports" -gt "0" ]]; then
-				nsesafeother
+				nsedefother
 		fi
 }
 
-alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports in output.	
+alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports in output.
 	nmap -Pn -sT $target -oN fullscan -p- --open >/dev/null 2>&1;
 	cat fullscan |grep open |grep -v nmap > .fsopen
 
@@ -297,9 +298,9 @@ alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports
 		done
 		mv .fsopen .openports
 
-		echo -e "${GREEN}[S3]${NC} Running VersionScan against $(cat .openports |wc -l) open ports"  |tee -a reckon
+		echo -e "${GREEN}[S3]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
 		round=2
-		versionscan
+		versionscantcp
 	
 		echo -e "${GREEN}[S4]${NC} Running EnumScans against $(cat .openports |wc -l) open ports." |tee -a reckon
 		enumscans
@@ -308,7 +309,7 @@ alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports
 	fi
 }
 
-alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports in output.	
+alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports in output.
 	nmap -Pn -sU $target -oN fulludpscan -p- --open >/dev/null 2>&1;
 	cat fulludpscan |grep open |grep -v filtered |grep -v nmap > .fsopen
 
@@ -326,7 +327,7 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 		done
 		mv .fsopen .openudpports
 
-		echo -e "${GREEN}[S3]${NC} Running VersionScan against $(cat .openports |wc -l) open ports"  |tee -a reckon
+		echo -e "${GREEN}[S3]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
 		round=2
 		versionscanudp
 	
@@ -354,12 +355,12 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	cd $workdir/$target
 	echo -e "${GREEN}[S1]${NC} Testing directory created at: $(pwd) "
 
-	echo -e "${GREEN}[S2]${NC} Running QuickScan against the top $tports tcp/udp ports." |tee -a reckon
+	echo -e "${GREEN}[S2]${NC} Running Quick Scan against the top $tports tcp/udp ports." |tee -a reckon
 	topscan
 
 	openports=$(cat .open* |wc -l)
 	if [[ "$openports" -gt "0" ]]; then
-	echo -e "${GREEN}[S3]${NC} Running VersionScan against $openports open ports."  |tee -a reckon
+	echo -e "${GREEN}[S3]${NC} Running Version Scan against $openports open ports."  |tee -a reckon
 	fi
 
 	tcpports=$(cat .openports |wc -l)
@@ -373,16 +374,17 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	fi
 
 	if [[ "$tcpports" -gt "0" ]]; then
-	echo -e "${GREEN}[S4]${NC} Running enumeration scripts against open tcp ports." |tee -a reckon
+	echo -e "${GREEN}[S4]${NC} Running Enumeration Scripts against identified tcp ports." |tee -a reckon
 	enumscans
 	fi
 
-	echo -e "${GREEN}[S5]${NC} Running FullScan against all tcp and udp ports." |tee -a reckon
+	echo -e "${GREEN}[S5]${NC} Running Full Scan against all tcp and udp ports." |tee -a reckon
 	alltcpscan
 	alludpscan
 
 	waitforscans
-	echo -e "${GREEN}[!]${NC} Reckon enumeration is complete" "\a" "\a" |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Reckon Script has completed" "\a" "\a" |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Reckon Script has completed" "\a" "\a" |tee -a reckon
 	cd $workdir
 }
 
@@ -397,7 +399,7 @@ splash(){ # Banner just because.
 	echo -e ""
 }
 
-usage(){ # To be printed when user input is not accepted as valided
+usage(){ # To be printed when user input is not valid
 		echo -e "[!] Example Usage: "
 		echo -e "[-] ./reckon.sh 192.168.1.100 "
 		echo -e "[-] ./reckon.sh scanme.nmap.org"
