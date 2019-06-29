@@ -158,9 +158,9 @@ dirbhttp(){  #Runs dirb against / of web services
 				unset IFS
 			else
 				if [[ "$wports" == "443" ]]; then
-					echo -e "${GREEN}[!]${NC} Dirb found no file or directories in https://$target/ " "\a"
+					echo -e "${GREEN}[!]${NC} Dirb found no file or directories in https://$target/ " "\a" |tee -a reckon
 				else
-					echo -e "${GREEN}[!]${NC} Dirb found no file or directories in http://$target:$dirbports/ " "\a"
+					echo -e "${GREEN}[!]${NC} Dirb found no file or directories in http://$target:$dirbports/ " "\a" |tee -a reckon
 				fi
 			fi
 		done
@@ -229,7 +229,14 @@ enumflnx(){ # Runs enum4linux
 	echo -e "${GREEN}[!]${NC} Running Enum4Linux on $target." |tee -a reckon
 	enum4linux $target 1> smb-enum4linux 2> /dev/null
 	smblines=$(cat $enumdir/smb-enum4linux |wc -l)
-	echo -e "${GREEN}[!]${NC} Enum4Linux Report $smblines is ready for review: $enumdir/smb-enum4linux" "\a"	 |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Enum4Linux Report contains $smblines lines. "  |tee -a reckon
+	echo -e "${GREEN}[!]${NC} REVIEW: $enumdir/smb-enum4linux" |tee -a reckon
+
+	IFS=$'\n'
+	for eflrep in $(cat smb-enum4linux |egrep '(allows sessions|\/\/)' |sed 's/\[+] //g' |grep -v "enum4linux v"); do
+	echo "[-]      $eflrep" |tee -a reckon
+	done
+	unset IFS
 }
 
 smbnsedefault(){ # Runs safe NSE SMB scripts
@@ -238,7 +245,7 @@ smbnsedefault(){ # Runs safe NSE SMB scripts
 		nmap -Pn -sV -sC -sT -sU $target -p $smbports --open -oN $smbports-smb-nsesafe 2> /dev/null 1> /dev/null
 		IFS=$'\n'
 			for smbenumsafe in $(cat $smbports-smb-nsesafe |grep "|" |cut -c 3-); do
-				echo "[-]      $smbenumsafe"
+				echo "[-]      $smbenumsafe" |tee -a reckon
 			done
 			unset IFS
 	done
@@ -252,7 +259,7 @@ smbnsevulns(){ # Runs all smb-vuln NSE scripts. DANGER: This could crash the tar
 	
 	if [[ "$smbresults" -gt "0" ]]; then
 		IFS=$'\n';
-		for smbscan in $(cat nse-smbvulns |grep "|" |cut -c 3-); do
+		for smbscan in $(cat smb-nsevulns |grep "|" |cut -c 3-); do
 			echo "[-]      $smbscan" |tee -a reckon
 		done
 		unset IFS
@@ -298,14 +305,14 @@ alltcpscan(){ # Scans for all TCP ports but excludes previously discovered ports
 		done
 		mv .fsopen .openports
 
-		echo -e "${GREEN}[S3]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
 		round=2
 		versionscantcp
 	
-		echo -e "${GREEN}[S4]${NC} Running EnumScans against $(cat .openports |wc -l) open ports." |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running EnumScans against $(cat .openports |wc -l) open ports." |tee -a reckon
 		enumscans
 	else
-		echo -e "${GREEN}[!]${NC}   No additional tcp ports identified."
+		echo -e "${GREEN}[!]${NC}   No additional tcp ports identified." |tee -a reckon
 	fi
 }
 
@@ -327,14 +334,14 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 		done
 		mv .fsopen .openudpports
 
-		echo -e "${GREEN}[S3]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running Version Scan against $(cat .openports |wc -l) open ports"  |tee -a reckon
 		round=2
 		versionscanudp
 	
-		echo -e "${GREEN}[S4]${NC} Running EnumScans against $(cat .openports |wc -l) open ports." |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running EnumScans against $(cat .openports |wc -l) open ports." |tee -a reckon
 		enumscans
 	else
-		echo -e "${GREEN}[!]${NC}   No additional tcp ports identified."
+		echo -e "${GREEN}[!]${NC}   No additional tcp ports identified." |tee -a reckon
 	fi
 }
 
@@ -353,14 +360,14 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	workdir=$(pwd)
 	mkdir $workdir/$target 2> /dev/null
 	cd $workdir/$target
-	echo -e "${GREEN}[S1]${NC} Testing directory created at: $(pwd) "
+	echo -e "${GREEN}[!]${NC} Testing directory created at: $(pwd) " |tee -a reckon
 
-	echo -e "${GREEN}[S2]${NC} Running Quick Scan against the top $tports tcp/udp ports." |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Quick Scan against the top $tports tcp/udp ports." |tee -a reckon
 	topscan
 
 	openports=$(cat .open* |wc -l)
 	if [[ "$openports" -gt "0" ]]; then
-	echo -e "${GREEN}[S3]${NC} Running Version Scan against $openports open ports."  |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Version Scan against $openports open ports."  |tee -a reckon
 	fi
 
 	tcpports=$(cat .openports |wc -l)
@@ -374,7 +381,7 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	fi
 
 	if [[ "$tcpports" -gt "0" ]]; then
-	echo -e "${GREEN}[S4]${NC} Running Enumeration Scripts against identified tcp ports." |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Enumeration Scripts against identified tcp ports." |tee -a reckon
 	enumscans
 	fi
 
@@ -400,6 +407,8 @@ splash(){ # Banner just because.
 }
 
 usage(){ # To be printed when user input is not valid
+		echo -e "All scan results will be stored in the current working directory."
+		echo -e ""
 		echo -e "[!] Example Usage: "
 		echo -e "[-] ./reckon.sh 192.168.1.100 "
 		echo -e "[-] ./reckon.sh scanme.nmap.org"
@@ -428,7 +437,7 @@ validate(){ # Validates $1 user argument and determines single host, or host fil
 
 		if [[ "$filecheck" -gt "0" ]]; then
 			listcnt=$(cat $userinput |wc -l)	
-				echo -e "${GREEN}[!]${NC} Host list detected. Scanning $listcnt total hosts."
+				echo -e "${GREEN}[!]${NC} Host list detected. Scanning $listcnt total hosts." 
 				for target in $(cat $userinput); do 
 					testinput=$(ping -w1 $target 2>&1)
 					hostlisttarget=$(echo $testinput |grep "bytes of data" |wc -l)
