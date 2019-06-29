@@ -12,20 +12,21 @@ Reckon will run on any Kali Linux image and is currently wrapping multiple tools
 ``` ./reckon.sh /home/user/hostlist.txt```
 
 ### Workflow
-Reckon's work flow was designed to provide you with quick highlevel results prior to conducting slower and more thorough scans in the later stages. Again, the intent of this wrapper is to increase time efficiency by minimize downtime. So rather than waiting 20+ minutes for full TCP/UDP scans with multiple argments, Reckon performs the same scans incrementally while regularly updating results to the terminal for review.
+Reckon's work flow was designed to provide incremental results so you an progress through manual enumeration while waiting on results from longer scans such as Nikto or Dirb. Again, the intent of this wrapper is to increase time efficiency by minimize waiting/downtime. 
 
 ### Reckon runs in five stages
 
-* <b>Stage 1:</b> Directory Creation - Upon execution, a target directory will be created in the current working directory. The results of scans will be filtered, organized, and printed to terminal while copies of the scans results will be stored in the target directory.
+* <b>Stage 1:</b> Directory Creation - Upon execution, a target directory will be created in the current working directory. The results of scans will be filtered, organized, and printed to terminal while copies of the scans results will be stored in the current working directory. This stage takes less than a second to complete.
 
-* <b>Stage 2:</b> QuickScan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. This scan is intended to give you quick results so you can descide where you would like to focus your attention (manual enumeration/research) while awaiting the results of pending scans in stage 3 and 4.
+* <b>Stage 2:</b> QuickScan - Using nmap --top-port arugement to scan for the top 100 common tcp ports. This number can be changed by modifying the tports variable (line 5). The purpose of this scan is to give quick (non-verbose) results so the tester can immediately begin prioritizing where to focus manual efforts. This stage usually completes in 10 seconds or less.
 
-* <b>Stage 3:</b> VersionScan - Run an nmap version scan targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 1000 would be flagged and handled the same as port 80 or 443 in stage 4.
+* <b>Stage 3:</b> VersionScan - Run an nmap version scan (sV) targeting the open ports previously identified in the quickscan. The scan will not only attempt to identify running services but also identify services running on non-standard ports. As example, a web server running on tcp port 25 would be flagged and addressed the same as port 80 or 443 in next stages.
 
-* <b>Stage 4:</b> EnumerationScan - Using the results from the quick scan and version scan, Reckon will begin running more aggressive scanners against the previously identified ports/services. Services are targeted in the following order: HTTP/HTTPS, SMB/NetBIOS/Samba, Other. Please note, in an attempt to prevent inaccurate results, DoS condictions, and general performance issues, Reckon only allows one instance of Nikto to run at a time however will create a scan queue so that Nikto is run against each port (or host) one at a time rather than similtaniously. This same consideration also applies to  dirb scans. 
+* <b>Stage 4:</b> EnumerationScan - Reckon will begin running NSE Default scripts followed by more aggressive scans/scripts such as NSE Vuln Scripts, Nikto, and Dirb against the previously identified ports/services when/where appropriate. Services are currently prioritized by HTTP, SMB, Other respectively. Identified HTTP and SMB services are given more time and attention than "Others". It's also important to note that in attempt to prevent inaccurate results, DoS conditions, and general performance issues, Reckon only allows one instance of Nikto (or Dirb) to run at a time but will create queue if Reckon is being run against a hostlist or a single target has multiple HTTP services running. 
 
-* <b>Stage 5:</b> FullScan - At this point only the top 100 tcp ports have been identified. Reckon will now begin targeting the remaining tcp ports then repeat stages 2, 3, and 4 for any newly identified ports.
+* <b>Stage 5:</b> FullScan - At this point only the top 100 tcp and udp ports have been identified and scanned. In this stage, Reckon will begin scanning the remaining 65435 (65535 - 100) tcp and udp ports. Previously identified ports will not be rescanned however any newly identified open ports will be sent through Stages 3 and 4. This phase is really for peace of mind for the event that a target server is running obscure services on epimeral ports. 
 
 ### Limitations
-* Reckon is a basic script running mostly default scans for the scripts/tools it is managing. Reckon should not be used with the expection of replacing thorough enumeration.
-* Adhears to all OSCP exam limitations: https://support.offensive-security.com/#!oscp-exam-guide.md
+* Reckon is only a simple bash script running mostly default scans for the scripts/tools it is wrapping. It should not be considered "Aggressive Enumeration" by any means and should not replace manual enumeration. 
+
+* Reckon adhears to all OSCP exam restrictions: https://support.offensive-security.com/#!oscp-exam-guide.md
