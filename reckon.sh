@@ -353,7 +353,7 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 
 	openports=$(cat .open* |wc -l)
 	if [[ "$openports" -gt "0" ]]; then
-	echo -e "${GREEN}[!]${NC} Running Version Scan against $openports open ports"  |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Version Scans against open ports"  |tee -a reckon
 	fi
 
 	tcpports=$(cat .openports |wc -l)
@@ -386,12 +386,15 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 
 	rm .openports
 	rm .openudpports
-	echo -e "${GREEN}[!]${NC} --- Reckon Scan Complete --- " |tee -a reckon
-	echo -e "${GREEN}[!]${NC} Runtime: $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
-	echo -e "${GREEN}[!}${NC} The following files have been created: "
-	echo -e "${GREEN}[!}${NC} -----------------------------" 
-	ls |sort -n
-	echo -e "${GREEN}[!}${NC} -----------------------------" 
+	echo -e "${GREEN}[!]${NC} -------- Reckon Scan Complete -------- " |tee -a reckon
+	echo -e "${GREEN}[!]${NC} $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
+	echo -e "${GREEN}[!]${NC} -------------------------------------- " 
+	echo -e "${GREEN}[!]${NC} The following files have been created: "
+	ls |sort -n > .files
+	for files in $(cat .files); do
+		echo "[-]      $files"
+	done
+	echo -e "${GREEN}[!]${NC} -------------------------------------- " 
 }
 
 splash(){ # Banner just because
