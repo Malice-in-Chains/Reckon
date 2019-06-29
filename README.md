@@ -2,7 +2,7 @@
 Is a simple wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more time efficient during testing by automating some basic tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB.
 
 ### Prerequisites
-Reckon will run on any Kali Linux image and is currently wrapping multiple tools and scripts such as: Nmap, Nmap-NSE, Curl, Enum4linux, Nikto, and Dirb. Reckon shouldn't have issue running on other Linux distros provided these tools are present.
+Reckon will run on any Kali Linux image (2017 and above) and is currently wrapping multiple tools and scripts such as: Nmap, Nmap-NSE, Curl, Enum4linux, Nikto, and Dirb. Reckon shouldn't have issue running on other Linux distros provided these tools are present.
 
 ### Example Usage
 ``` ./reckon.sh 10.10.10.10 ```
