@@ -371,12 +371,12 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	enumscans
 	fi
 
-	echo -e "${GREEN}[!]${NC} Running Full Scan against all TCP ports" |tee -a reckon
+	echo -e "${GREEN}[!]${NC} Running Full TCP Scan" |tee -a reckon
 	alltcpscan
 	
 
 	# Enabling this will do a full UDP scan, which will take a significant amount of time.
-	# echo -e "${GREEN}[!]${NC} Running Full Scan against all UDP ports. Get comfortable, this may take awhile.." |tee -a reckon
+	# echo -e "${GREEN}[!]${NC} Running Full UDP Scan. Get comfortable, this may take awhile.." |tee -a reckon
 	# alludpscan
 
 	scansrunning=$(ps -aux |grep $target |grep -v grep |grep -v reckon |wc -l)
@@ -387,14 +387,15 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	rm .openports
 	rm .openudpports
 	echo -e "${GREEN}[!]${NC} -------- Reckon Scan Complete -------- " |tee -a reckon
-	echo -e "${GREEN}[!]${NC} $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
+	echo -e "${GREEN}[!]${NC}    $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
 	echo -e "${GREEN}[!]${NC} -------------------------------------- " 
-	echo -e "${GREEN}[!]${NC} The following files have been created: "
+	echo -e "${GREEN}[!]${NC} The following files have been created "
+	echo -e "${GREEN}[!]${NC} -------------------------------------- "
 	ls |sort -n > .files
 	for files in $(cat .files); do
-		echo "[-]      $files"
+		echo "[-]          $files"
 	done
-	echo -e "${GREEN}[!]${NC} -------------------------------------- " 
+	echo -e "${GREEN}[!]${NC} ------------- COMPLETE --------------- " 
 }
 
 splash(){ # Banner just because
