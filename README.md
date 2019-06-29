@@ -1,6 +1,8 @@
 # Reckon
 Is a simple wrapper script written in bash. It was written in preparation for the OSCP exam to help me be more time efficient during testing by automating some basic tasks and scans with a focus on enumerating the more targetable services like HTTP and SMB.
 
+* Reckon adhears to all OSCP exam restrictions: https://support.offensive-security.com/#!oscp-exam-guide.md
+
 ### Prerequisites
 Reckon will run on any recent Kali Linux image and is currently wrapping tools and scripts such as: Nmap, Nmap-NSE, Curl, Enum4linux, Nikto, and Dirb. Reckon shouldn't have issue running on other Linux distros provided these tools are installed and are in the users $PATH.
 
@@ -28,5 +30,3 @@ Reckon's work flow was designed to provide incremental results so you an progres
 
 ### Limitations
 * Reckon is only a simple bash script running mostly default scans for the scripts/tools it is wrapping. It should not be considered "Aggressive Enumeration" by any means and should not replace manual enumeration. This script is intended to automate and provide results to simplistic/common tasks during the enumeration phase.
-
-* Reckon adhears to all OSCP exam restrictions: https://support.offensive-security.com/#!oscp-exam-guide.md
