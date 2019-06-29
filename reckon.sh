@@ -386,16 +386,17 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 
 	rm .openports
 	rm .openudpports
-	echo -e "${GREEN}[!]${NC} -------- Reckon Scan Complete -------- " |tee -a reckon
-	echo -e "${GREEN}[!]${NC}    $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
-	echo -e "${GREEN}[!]${NC} -------------------------------------- " 
-	echo -e "${GREEN}[!]${NC} The following files have been created "
-	echo -e "${GREEN}[!]${NC} -------------------------------------- "
+	
+	echo -e "${GREEN}[!]${NC} ---------------------------------------- " |tee -a reckon
+	echo -e "${GREEN}[!]${NC}  The following files have been created   " |tee -a reckon
+	echo -e "${GREEN}[!]${NC} ---------------------------------------- " |tee -a reckon
 	ls |sort -n > .files
 	for files in $(cat .files); do
-		echo "[-]          $files"
+		echo "[-]          $files" |tee -a reckon
 	done
-	echo -e "${GREEN}[!]${NC} ------------- COMPLETE --------------- " 
+	echo -e "${GREEN}[!]${NC} ---------------------------------------- " |tee -a reckon
+	echo -e "${GREEN}[!]${NC}    $(($SECONDS / 3600)) hours, $((($SECONDS / 60) % 60)) minutes, and $(($SECONDS % 60)) seconds" |tee -a reckon
+	echo -e "${GREEN}[!]${NC} --------- Reckon Scan Complete --------- " |tee -a reckon
 }
 
 splash(){ # Banner just because
