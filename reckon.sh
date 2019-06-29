@@ -1,14 +1,20 @@
 #!/bin/bash
-# Reckon performs initial active reconnaissance tasks to help speed 
-# up the scanning and enumeration process for penetration testing.
 # Written by MaliceInChains
+# -----------------------------------------------------------------
+# Reckon performs common active reconnaissance tasks in order speed 
+# up scanning and enumeration processes during penetration testing.
+# -----------------------------------------------------------------
 
+# Adjust the number of --top-ports for Phase 2 Quick Scan
+tports=100
+
+# Color Variables
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
-tports=100
+
+# For calculating run time
 SECONDS=0
-#round=1
 
 topscan(){ # Conducts a quick scan of top ___TCPports, change tports for top 10.
 	nmap -Pn -sT $target -oN quickscan --top-ports $tports --open >/dev/null 2>&1;
