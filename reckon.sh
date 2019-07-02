@@ -7,6 +7,8 @@
 
 # Adjust the number of --top-ports for Phase 2 Quick Scan
 tports=100
+udp=False
+tcp=True
 
 # Color Variables
 GREEN='\033[0;32m'
@@ -17,22 +19,26 @@ NC='\033[0m'
 SECONDS=0
 
 topscan(){ # Conducts a quick scan of top ___ TCP ports, change tports for top 10
-	nmap -Pn -sT $target -oN quickscan --top-ports $tports --open >/dev/null 2>&1;
-	cat quickscan |grep open |grep -v nmap > .openports
-	echo -e "${GREEN}[!]${NC}   Nmap identified $(cat quickscan |grep open |grep -v nmap |wc -l) open TCP ports on $target" "\a"  |tee -a reckon
+	if [[ $tcp == "True" ]]; then
+		nmap -Pn -sT $target -oN quickscan --top-ports $tports --open >/dev/null 2>&1;
+		cat quickscan |grep open |grep -v nmap > .openports
+		echo -e "${GREEN}[!]${NC}   Nmap identified $(cat quickscan |grep open |grep -v nmap |wc -l) open TCP ports on $target" "\a"  |tee -a reckon
 	
-	for nports in $(cat quickscan |grep open |grep -v nmap |awk '{print$1}'); do 
-		echo "[-]      $nports" |tee -a reckon
-	done
-
+		for nports in $(cat quickscan |grep open |grep -v nmap |awk '{print$1}'); do 
+			echo "[-]      $nports" |tee -a reckon
+		done
+	fi
 	# Conducts a quick scan of top 100 UDP ports.
-	nmap -Pn -sU $target -oN quickudpscan --top-ports $tports --open >/dev/null 2>&1;
-	cat quickudpscan |grep open |grep -v filtered |grep -v nmap > .openudpports
-	echo -e "${GREEN}[!]${NC}   Nmap identified $(cat quickudpscan |grep open |grep -v filtered |grep -v nmap |wc -l) open UDP ports on $target" "\a"  |tee -a reckon
+
+	if [[ $udp == "True" ]]; then
+		nmap -Pn -sU $target -oN quickudpscan --top-ports $tports --open >/dev/null 2>&1;
+		cat quickudpscan |grep open |grep -v filtered |grep -v nmap > .openudpports
+		echo -e "${GREEN}[!]${NC}   Nmap identified $(cat quickudpscan |grep open |grep -v filtered |grep -v nmap |wc -l) open UDP ports on $target" "\a"  |tee -a reckon
 	
-	for nports in $(cat quickudpscan |grep open |grep -v filtered |grep -v nmap |awk '{print$1}'); do 
-		echo "[-]      $nports" |tee -a reckon
-	done
+		for nports in $(cat quickudpscan |grep open |grep -v filtered |grep -v nmap |awk '{print$1}'); do 
+			echo "[-]      $nports" |tee -a reckon
+		done
+	fi
 }
 
 versionscantcp(){ # Conduct -sV scan on previously identified TCP ports
@@ -50,11 +56,12 @@ versionscantcp(){ # Conduct -sV scan on previously identified TCP ports
 			echo -e "[-]      $oports/TCP is running $srv service via $vrn"  |tee -a reckon
 		fi	
 	done
+	cat *-version |grep "tcp open" |grep -v nmap 2> /dev/null 1> .openports
 }
 
 versionscanudp(){ # Conduct -sV scan on previously identified UDP ports
 
-	for oports in $(cat .openudpports |grep open |grep -v filtered |awk '{print$1}' |awk -F "/" '{print$1}'); do
+	for oports in $(cat .openudpports |grep open |grep -v filtered |awk '{print$1}' |awk -F "/" '{print$1}' 2> /dev/null); do
 		nmap -Pn -sU -sV $target -p $oports -oN $oports-udp-version 2> /dev/null 1> /dev/null
 		trn=$(cat $oports-udp-version |grep open |awk -F "$(cat $oports-udp-version |grep open |cut -d " " -f1,2,3,4)" '{print$2}' |sed 's/  //g')
 		vrn=$(echo $trn |sed 's/  / /g')
@@ -67,6 +74,7 @@ versionscanudp(){ # Conduct -sV scan on previously identified UDP ports
 			echo -e "[-]      $oports/UDP is running $srv service via $vrn"  |tee -a reckon
 		fi	
 	done
+	cat *-version |grep "udp open" |grep -v nmap 2> /dev/null 1> .openudpports
 }
 
 httpenum(){ # Runs various scanners against http and https ports
@@ -100,10 +108,10 @@ pullheaders(){ # Grabs HTTP headers from http://target/
 }
 
 niktohttp(){ # Runs default Nikto scan
-	wports=$(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
+	wports=$(cat .openports |grep -i http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
 	if [[ "$wports" -gt "0" ]];then
 		echo -e "${GREEN}[!]${NC}    Nikto queued for http ports." |tee -a reckon
-		for nikports in $(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |awk '{print$1}' |awk -F "/" '{print$1}' |sort -g); do
+		for nikports in $(cat .openports |grep -i http |grep -v "Microsoft Windows RPC over HTTP" |awk '{print$1}' |awk -F "/" '{print$1}' |sort -g); do
 		
 			if [[ "$wports" == "443" ]]; then
 				nikto -h https://$target  2> /dev/null 1> $nikports-nikto
@@ -123,7 +131,7 @@ niktohttp(){ # Runs default Nikto scan
 }
 
 dirbhttp(){  #Runs dirb against / of web services
-	wports=$(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
+	wports=$(cat .openports |grep -i http |grep -v "Microsoft Windows RPC over HTTP" |wc -l)
 	if [[ "$wports" -gt "0" ]];then
 		echo -e "${GREEN}[!]${NC}    Dirb queued for http ports." |tee -a reckon
 		for dirbports in $(cat .openports |grep http |grep -v "Microsoft Windows RPC over HTTP" |awk '{print$1}' |awk -F "/" '{print$1}' |sort -g); do
@@ -168,11 +176,15 @@ nsedefhttp(){ # Runs Default HTTP NSE scripts
 	else
 		echo "[-]      No results from NSE Default Scripts" |tee -a reckon
 	fi
+
+	if [[ "results" == "0" ]]; then
+		echo "[-]      No Results" |tee -a reckon
+	fi
 }
 
 nsedefother(){ # Runs Default NSE scripts
 	
-	openudpports=$(cat .openudpports |grep open |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep -v filtered |wc -l)
+	openudpports=$(cat .openudpports |grep open |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep -v filtered |wc -l 2> /dev/null)
 	opentcpports=$(cat .openports |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |grep open |wc -l)
 	
 	# NSE Default scripts for open TCP ports
@@ -189,13 +201,18 @@ nsedefother(){ # Runs Default NSE scripts
 				done
 				unset IFS
 			fi
+
+			if [[ "results" == "0" ]]; then
+				echo "[-]      No Results" |tee -a reckon
+			fi
+
 		done
 	fi
 	echo "" > .openports
 
 	# NSE Default scripts for open UDP ports
 	if [[ "$openudpports" -gt "0" ]]; then
-		for otherports in $(cat .openudpports |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep open |awk -F "/" '{print$1}'); do
+		for otherports in $(cat .openudpports |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |grep open |awk -F "/" '{print$1}' 2> /dev/null); do
 			echo -e "${GREEN}[!]${NC} Running NSE Default Scripts against UDP port $otherports" |tee -a reckon
 			nmap -Pn -sU -sV -sC $target -p $otherports --open -oN $otherports-udp-nse 2> /dev/null 1> /dev/null
 			results=$(cat $otherports-udp-nse |grep "|" |wc -l)
@@ -207,6 +224,11 @@ nsedefother(){ # Runs Default NSE scripts
 				done
 				unset IFS
 			fi
+
+			if [[ "results" == "0" ]]; then
+				echo "[-]      No Results" |tee -a reckon
+			fi
+			
 		done
 	fi	
 	echo "" > .openudpports
@@ -257,19 +279,19 @@ smbnsevulns(){ # Runs all smb-vuln NSE scripts. DANGER: This could crash the tar
 }
 
 enumscans(){ # Creates a priority of services to enumerate first
-	wports=$(cat .openports |grep http |wc -l)
+	wports=$(cat *-version |grep open |grep -i http |wc -l)
 		if [[ "$wports" -gt "0" ]]; then
 			httpenum
 		fi
 
-	smbports=$(cat .open* |egrep -i '(microsoft-ds|netbios-ssn|samba|smb)'|wc -l)
+	smbports=$(cat *-version |grep open |egrep -i '(microsoft-ds|netbios-ssn|samba|smb)'|wc -l)
 		if [[ "$smbports" -gt "0" ]]; then
 			enumflnx
 			smbnsedefault
 			smbnsevulns
 		fi
 
-	otherports=$(cat .open* |egrep -vi '(microsoft-ds|netbios-ssn|samba|http)' |wc -l)
+	otherports=$(cat *-version |grep open |egrep -vi '(microsoft-ds|netbios-ssn|samba|smb|http)' |wc -l)
 		if [[ "$otherports" -gt "0" ]]; then
 				nsedefother
 		fi
@@ -321,10 +343,10 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 		done
 		mv .fsopen .openudpports
 
-		echo -e "${GREEN}[!]${NC} Running Version Scan against $(cat .openudpports |wc -l) UDP port(s)"  |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running Version Scan against $(cat .openudpports |wc -l 2> /dev/null) UDP port(s)"  |tee -a reckon
 		versionscanudp
 	
-		echo -e "${GREEN}[!]${NC} Running Enumeration Scans against $(cat .openudpports |wc -l) UDP ports(s)" |tee -a reckon
+		echo -e "${GREEN}[!]${NC} Running Enumeration Scans against $(cat .openudpports |wc -l 2> /dev/null) UDP ports(s)" |tee -a reckon
 		enumscans
 	else
 		echo -e "${GREEN}[!]${NC}   No additional UDP ports identified" |tee -a reckon
@@ -334,6 +356,17 @@ alludpscan(){ # Scans for all UDP ports but excludes previously discovered ports
 waitforscans(){ # Holds the terminal open until all Nikto scans have completed
     scansrunning=$(ps -aux |grep $target |grep -v grep |grep -v reckon |wc -l)
 	echo -e "${GREEN}[!]${NC} Waiting on $scansrunning scan(s) to complete"
+
+	nikrun=$(ps -aux |grep $target |grep nikto |wc -l)
+	if [[ "$nikrun" -gt "0" ]]; then 
+	echo "[-]      Nikto still running" |tee -a reckon
+	fi
+
+	dirbrun=$(ps -aux |grep $target |grep dirb |wc -l)
+	if [[ "$dbirun" -gt "0" ]]; then 
+	echo "[-]      Dirb still running" |tee -a reckon
+	fi
+
 	if [[ "$scansrunning" -gt "0" ]]; then
 		while [[ "$scansrunning" -gt "0" ]]; do 
 			sleep 1
@@ -356,12 +389,12 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	echo -e "${GREEN}[!]${NC} Running Version Scans against open ports"  |tee -a reckon
 	fi
 
-	tcpports=$(cat .openports |wc -l)
+	tcpports=$(cat .openports |grep open |wc -l)
 	if [[ "$tcpports" -gt "0" ]]; then	
 	versionscantcp
 	fi
 
-	udpports=$(cat .openudpports |wc -l)
+	udpports=$(cat .openudpports |grep open |wc -l 2> /dev/null)
 	if [[ "$udpports" -gt "0" ]]; then
 	versionscanudp
 	fi
@@ -384,8 +417,8 @@ mainfunction(){ # Runs enumeration functions for a single host $1 user arguement
 	waitforscans
 	fi
 
-	rm .openports
-	rm .openudpports
+	#rm .openports
+	#rm .openudpports
 	
 	echo -e "${GREEN}[!]${NC} ---------------------------------------- " |tee -a reckon
 	echo -e "${GREEN}[!]${NC}  The following files have been created   " |tee -a reckon
