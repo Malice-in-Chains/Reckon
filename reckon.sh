@@ -5,9 +5,12 @@
 # up scanning and enumeration processes during penetration testing.
 # -----------------------------------------------------------------
 
-# Adjust the number of --top-ports for Phase 2 Quick Scan
+# Adjust your reckon scans here. 
+# NMAP --top-ports
 tports=100
+# NMAP UDP Scans
 udp=False
+# NMAP TCP Scans
 tcp=True
 
 # Color Variables
